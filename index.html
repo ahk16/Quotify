@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> QUOTIFY </title>
+    </head>
+    <body>
+       <div id="root"> </div>
+       <link rel="stylesheet" href="style.css">
+       
+          <center><h1> <b><i>QUOTIFY</i></b></h1></center>
+           <a href="index.html"  id="anchor" onclick="getQuote()">Random Quote (API)</a>
+           <a href="local.html"  onclick="getSavedQuote()">Random Quote (Local)</a>
+           <a href="add-quote.html"  id="add">Add Quote</a>
+        
+           <a href="allQuotesLocal.html" id="allLocal" >List all Quotes (Local)</a> 
+   
+           <blockquote><i class="quoteIcon1 fas fa-quote-left"></i><span id="quoteLocal"></span><i class="quoteIcon2 fas fa-quote-right"></i></blockquote>
+                        <h5 id="authorLocal"></h5>
+           
+           <blockquote><i class="quoteIcon1 fas fa-quote-left"></i><span id="quote-text-api"></span><i class="quoteIcon2 fas fa-quote-right"></i></blockquote>
+                        <h5 id="author-name-api"></h5>
+        
+                        <center><button id="btn">Generate Another Quote</button></center>
+      
+            <button id="btn1" onclick="save" >Save to local</button>        
+        </div>
+
+       <script>
+           var rootHandle = document.getElementById('root');
+           var aTagHandle = document.getElementById('anchor');
+            var btn1Handle = document.getElementById('btn1')
+
+            var quoteHandle = document.getElementById('quote-text-api');
+            var authorHandle = document.getElementById('author-name-api');
+
+           
+           
+
+            function getQuote() {
+                
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'https://talaikis.com/api/quotes/random/');
+                xhr.send();
+
+                xhr.onload = function() {
+                    //console.log(typeof xhr.responseText)
+                    var quote = JSON.parse(xhr.responseText);
+                    
+                     quoteHandle.innerHTML = quote.quote;
+                     authorHandle.innerHTML = quote.author;
+
+                     console.log(quote);
+                }
+            }
+            
+            
+            getQuote();
+            
+            
+       //Generate random quote button     
+            var btnHandle = document.getElementById('btn');
+            btnHandle.addEventListener('click', function(){
+                getQuote();
+                btn1Handle.innerHTML = "Save to Local"
+                btn1Handle.disabled = false;
+             }, false); 
+                
+        // save to local button
+        let quoteArray = localStorage.getItem('quoteArray') ? JSON.parse(localStorage.getItem('quoteArray')) : [];
+        console.log(quoteArray);
+
+        function save() {
+            let quoteExists = quoteArray.find( function(quote){
+                return quote.quoteText == quote;
+            });
+
+            if(!quoteExists) {
+                
+                let quoteObj = {
+                    quoteText : quoteHandle.innerHTML,
+                    quoteAuthor : authorHandle.innerHTML
+                };
+                
+                quoteArray.push(quoteObj);
+
+                localStorage.setItem('quoteArray', JSON.stringify(quoteArray));
+                return true;
+            } else {
+                return false;
+            }
+            
+        }
+
+        btn1Handle.addEventListener('click', function() {
+            // save();
+            if(save(quoteHandle.innerText, authorHandle.innerText)) {
+                btn1Handle.innerHTML =  "Saved ";
+            }
+            btn1Handle.disabled = true;   
+            
+        }, false);
+        
+
+   
+       
+            
+       </script>
+    </body>
+</html>

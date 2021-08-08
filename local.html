@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> QUOTIFY </title>
+    </head>
+    <body>
+       <div id="root"> </div>
+       
+          <center><h1> <b><i>QUOTIFY</i></b></h1></center>
+           <blockquote><i class="quoteIcon1 fas fa-quote-left"></i><span id="quoteLocal">yaas - this alone is worth the struggle.</span><i class="quoteIcon2 fas fa-quote-right"></i></blockquote>
+                        <h5 id="authorLocal">William Osler</h5>
+           
+           <blockquote><i class="quoteIcon1 fas fa-quote-left"></i><span id="quote-text-api"></span><i class="quoteIcon2 fas fa-quote-right"></i></blockquote>
+                        <h5 id="author-name-api"></h5>
+        <button id="getLocal">Get another quote </button>
+      </div>
+
+      
+
+       <script>
+        
+        let quoteArray = localStorage.getItem('quoteArray') ? JSON.parse(localStorage.getItem('quoteArray')) : [];
+        
+
+        //random quote link(local)
+        var quoteLocalHandle = document.getElementById('quoteLocal');
+        var authorLocalHandle = document.getElementById('authorLocal');
+        var btnLocalHandle = document.getElementById('getLocal');
+       
+        function getSavedQuote() {
+            let randomArrIndex = Math.ceil(Math.random() * quoteArray.length) - 1;
+            quoteLocalHandle.innerHTML = quoteArray[randomArrIndex].quoteText;
+            authorLocalHandle.innerHTML = quoteArray[randomArrIndex].quoteAuthor;
+        
+        }
+        getSavedQuote();
+        
+        btnLocalHandle.addEventListener('click', getSavedQuote, false);
+       
+            
+            
+       </script>
+    </body>
+</html>

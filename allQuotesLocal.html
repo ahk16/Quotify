@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> QUOTIFY </title>
+    </head>
+    <body>
+       <div id="root"> </div>
+       
+          <center><h1> <b><i>QUOTIFY</i></b></h1></center>
+           <a href="index.html"  id="anchor" onclick="getQuote()">Random Quote (API)</a>
+           <a href="local.html"  onclick="getSavedQuote()">Random Quote (Local)</a>
+           <a href="add-quote.html"  id="add">Add Quote</a>
+        
+           <a href="allQuotesLocal.html" id="allLocal" >List all Quotes (Local)</a> 
+   
+           <blockquote><i class="quoteIcon1 fas fa-quote-left"></i><span id="quoteLocal"></span><i class="quoteIcon2 fas fa-quote-right"></i></blockquote>
+                        <h5 id="authorLocal"></h5>
+           
+           <blockquote><i class="quoteIcon1 fas fa-quote-left"></i><span id="quote-text-api"></span><i class="quoteIcon2 fas fa-quote-right"></i></blockquote>
+                        <h5 id="author-name-api"></h5>
+        
+                        <center><button id="btn">Generate Another Quote</button></center>
+      
+            <button id="btn1" onclick="save" >Save to local</button>      
+            
+        </div>
+           
+        
+                
+       <script>
+           
+    listAllQuotesHandle = document.getElementById('allLocal');
+    let editBtnLocalHandle = document.getElementById('edit-btn-local');
+let deleteBtnLocalHandle = document.getElementById('delete-btn-local');
+        
+           function listAllQuotes() {
+    hideAllSections();
+
+    for (let i=0; i<quoteArray.length; i++){
+
+        let allQuoteSection = `
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <figure class="quote">
+                            <blockquote><i class="quoteIcon1 fas fa-quote-left"></i><span id="quote-text-local">${quoteArray[i].quoteText}</span><i class="quoteIcon2 fas fa-quote-right"></i></blockquote>
+                            <h5 id="author-name-local">${quoteArray[i].quoteAuthor}</h5>
+                            <div class="author d-flex justify-content-md-around justify-content-sm-around justify-content-xs-around">
+                                <button type="button" class="btn edit-btn" onclick="editQuoteLocal(this)"><i class="fas fa-edit"></i></button>
+                                <img onerror="if (this.src != 'quotify_logo.jpg') this.src = 'quotify_logo.jpg';" src="${quoteArray[i].authorImageLink}" alt="Quotify Logo"  id="author-image-local"/>
+                                <button type="button" class="btn delete-btn" onclick="deleteQuoteLocal(this)" ><i class="far fa-trash-alt"></i></button>
+                            </div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let newSectionElement = document.createElement('section');
+        newSectionElement.setAttribute('class', 'quote-box-for-local-all');
+        newSectionElement.innerHTML = allQuoteSection;
+        document.body.appendChild(newSectionElement);
+    }
+}
+
+listAllQuotesHandle.addEventListener('click', listAllQuotes, false);
+
+//delete button to delete from localstorage
+deleteBtnLocalHandle.addEventListener('click', function(){
+    let deleteQuoteText = this.parentNode.parentNode.childNodes[1].childNodes[1].innerText;
+
+    let quoteIndex = quoteArray.findIndex(quote => quote.quoteText.toLowerCase() == deleteQuoteText.toLowerCase());
+
+    titleModal.innerHTML = 'Delete Confirmation';
+    bodyModal.innerHTML = 'Are you sure to delete this quote from Local Storage. Once it is done, it won\'t be retrieved back';
+    firstBtnModal.innerHTML = 'Cancel';
+    secondBtnModal.innerHTML = 'Delete';
+    secondBtnModal.setAttribute('class', 'btn btn-danger');
+    $('.quotify-modal').modal('show');
+
+    secondBtnModal.addEventListener('click', function(){
+        quoteArray.splice(quoteIndex, 1);
+        localStorage.setItem('quoteArray',JSON.stringify(quoteArray));
+        $('.quotify-modal').modal('hide');
+        if(quoteArray.length>0){
+            pullQuotesLocal();
+        } else {
+            pullQuotesApi();
+        }
+        
+    }, false);
+}, false);
+
+
+editBtnLocalHandle.addEventListener('click', function(){
+    let updateQuoteText = this.parentNode.parentNode.childNodes[1].childNodes[1].innerText;
+    let updateQuoteAuthor = this.parentNode.parentNode.childNodes[3].innerText;
+    let updateQuoteImage = this.parentNode.children[1].getAttribute('src');
+
+    let updateQuoteIndex = quoteArray.findIndex(quote => quote.quoteText.toLowerCase() == updateQuoteText.toLowerCase());
+
+
+    titleModal.innerHTML = 'Update Selected Quote';
+    bodyModal.innerHTML = `
+            <form name="updateQuote" id="form">
+            <div class="form-group">
+                <textarea class="form-control" id="add-quote-text-area" rows="3" placeholder=${updateQuoteText} required></textarea>
+            </div>
+            <div class="form-group">
+                <input class="form-control" id="add-author-name" type="text" value="${updateQuoteAuthor}" required>
+            </div>
+            <div class="form-group">
+                <input class="form-control" id="add-author-image" type="text" value="${updateQuoteImage}">
+                <small id="emailHelp" class="form-text text-muted">*If you don't have profile pic url, just leave it blank.</small>
+            </div>
+            </form>
+            `;
+    
+    firstBtnModal.innerHTML = 'Cancel';
+    secondBtnModal.innerHTML = 'Update';
+    secondBtnModal.setAttribute('class', 'btn btn-success');
+    secondBtnModal.setAttribute('type', 'submit');
+
+    $('.quotify-modal').modal('show');
+
+    secondBtnModal.addEventListener('click', function(e){
+        e.preventDefault();
+        quoteArray[updateQuoteIndex].quoteText = document.forms.updateQuote.elements[0].value;
+        quoteArray[updateQuoteIndex].quoteAuthor = document.forms.updateQuote.elements[1].value;
+        quoteArray[updateQuoteIndex].authorImageLink = document.forms.updateQuote.elements[2].value;
+        localStorage.setItem('quoteArray', JSON.stringify(quoteArray));
+        pullQuotesLocal();
+        $('.quotify-modal').modal('hide');
+    }, false);
+
+}, false);
+
+
+function deleteQuoteLocal(obj) {
+    let deleteQuoteText = obj.parentNode.parentNode.childNodes[1].childNodes[1].innerText;
+    console.log(deleteQuoteText);
+    let quoteIndex = quoteArray.findIndex(quote => quote.quoteText.toLowerCase() == deleteQuoteText.toLowerCase());
+
+    titleModal.innerHTML = 'Delete Confirmation';
+    bodyModal.innerHTML = 'Are you sure to delete this quote from Local Storage. Once it is done, it won\'t be retrieved back';
+    firstBtnModal.innerHTML = 'Cancel';
+    secondBtnModal.innerHTML = 'Delete';
+    secondBtnModal.setAttribute('class', 'btn btn-danger');
+    $('.quotify-modal').modal('show');
+
+    secondBtnModal.addEventListener('click', function(){
+        quoteArray.splice(quoteIndex, 1);
+        localStorage.setItem('quoteArray',JSON.stringify(quoteArray));
+        $('.quotify-modal').modal('hide');
+        if(quoteArray.length>0){
+            listAllQuotes();
+        } else {
+            pullQuotesApi();
+        }
+        
+    }, false);
+}
+
+function editQuoteLocal(obj) {
+    let updateQuoteText = obj.parentNode.parentNode.childNodes[1].childNodes[1].innerText;
+    let updateQuoteAuthor = obj.parentNode.parentNode.childNodes[3].innerText;
+    let updateQuoteImage = obj.parentNode.children[1].getAttribute('src');
+
+    let updateQuoteIndex = quoteArray.findIndex(quote => quote.quoteText.toLowerCase() == updateQuoteText.toLowerCase());
+
+
+    titleModal.innerHTML = 'Update Selected Quote';
+    bodyModal.innerHTML = `
+            <form name="updateQuote" id="form">
+            <div class="form-group">
+                <textarea class="form-control" id="add-quote-text-area" rows="3" placeholder="${updateQuoteText}" required></textarea>
+            </div>
+            <div class="form-group">
+                <input class="form-control" id="add-author-name" type="text" value="${updateQuoteAuthor}" required>
+            </div>
+            <div class="form-group">
+                <input class="form-control" id="add-author-image" type="text" value="${updateQuoteImage}">
+                <small id="emailHelp" class="form-text text-muted">*If you don't have profile pic url, just leave it blank.</small>
+            </div>
+            </form>
+            `;
+    
+    firstBtnModal.innerHTML = 'Cancel';
+    secondBtnModal.innerHTML = 'Update';
+    secondBtnModal.setAttribute('class', 'btn btn-success');
+    secondBtnModal.setAttribute('type', 'submit');
+
+    $('.quotify-modal').modal('show');
+
+    secondBtnModal.addEventListener('click', function(e){
+        e.preventDefault();
+        quoteArray[updateQuoteIndex].quoteText = document.forms.updateQuote.elements[0].value;
+        quoteArray[updateQuoteIndex].quoteAuthor = document.forms.updateQuote.elements[1].value;
+        quoteArray[updateQuoteIndex].authorImageLink = document.forms.updateQuote.elements[2].value;
+        localStorage.setItem('quoteArray', JSON.stringify(quoteArray));
+        listAllQuotes();
+        $('.quotify-modal').modal('hide');
+    }, false);
+}
+              
+       </script>
+    </body>
+</html>
+
+

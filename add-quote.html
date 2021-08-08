@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> QUOTIFY </title>
+    </head>
+    <body>
+       <div id="root"> </div>
+       
+          <center><h2> <b><i>ADD QUOTE</i></b></h2></center>
+
+        <form name="addQuote" id="form">
+            <textarea id="add-quote" rows=3 placeholder="Type your Quote Here"></textarea>
+            <input id="add-name" type="text" placeholder="Author Name"/>
+            <button type="submit" id="addBtn">Save</button>
+        </form>
+
+        </div>
+
+       <script>
+                //save to local button
+        let quoteArray = localStorage.getItem('quoteArray') ? JSON.parse(localStorage.getItem('quoteArray')) : [];
+        console.log(typeof quoteArray);
+
+        function save(quote, author) {
+            let quoteExists = quoteArray.find( quote => quote.quote == quote );
+
+            if(!quoteExists) {
+                
+                let quoteObj = {
+                    quoteText : quote,
+                    quoteAuthor : author
+                };
+                
+                quoteArray.push(quoteObj);
+
+                localStorage.setItem('quoteArray', JSON.stringify(quoteArray));
+                return true;
+            } else {
+                return false;
+            }
+            
+        }
+
+         var addBtnHandle = document.getElementById('addBtn');
+                var addQuoteTextHandle = document.getElementById('add-quote');
+                var addAuthorNameHandle = document.getElementById('add-name');
+                addBtnHandle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if(save(addQuoteTextHandle.value, addAuthorNameHandle.value)) {
+                        alert("Saved successfully");
+                    } else {
+                        alert("Already saved");
+                    }
+        
+                }, false);
+
+            
+       </script>
+    </body>
+</html>
