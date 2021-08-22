@@ -39,14 +39,14 @@
             function getQuote() {
                 
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', 'https://talaikis.com/api/quotes/random/');
+                xhr.open('GET', 'https://api.quotable.io/random/');
                 xhr.send();
 
                 xhr.onload = function() {
                     //console.log(typeof xhr.responseText)
                     var quote = JSON.parse(xhr.responseText);
                     
-                     quoteHandle.innerHTML = quote.quote;
+                     quoteHandle.innerHTML = quote.content;
                      authorHandle.innerHTML = quote.author;
 
                      console.log(quote);
